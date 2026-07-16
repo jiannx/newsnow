@@ -1,6 +1,7 @@
 import type { SourceID, SourceResponse } from "@shared/types"
 import { getters } from "#/getters"
 import { getCacheTable } from "#/database/cache"
+import { translateNewsItems } from "#/services/translation"
 import type { CacheInfo } from "#/types"
 
 const info = {
@@ -64,7 +65,7 @@ export default defineEventHandler(async (event): Promise<SourceResponse> => {
     }
 
     try {
-      const newData = (await getters[id]()).slice(0, 30)
+      const newData = await translateNewsItems(id, (await getters[id]()).slice(0, 30))
       if (cacheTable && newData.length) {
         if (event.context.waitUntil) event.context.waitUntil(cacheTable.set(id, newData))
         else await cacheTable.set(id, newData)

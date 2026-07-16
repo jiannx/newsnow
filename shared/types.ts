@@ -89,7 +89,12 @@ export interface NewsItem {
   title: string
   url: string
   mobileUrl?: string
+  description?: string
   pubDate?: number | string
+  translation?: {
+    title?: string
+    description?: string
+  }
   extra?: {
     hover?: string
     date?: number | string

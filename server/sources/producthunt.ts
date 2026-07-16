@@ -2,12 +2,33 @@ import process from "node:process"
 import dayjs from "dayjs/esm"
 import timezonePlugin from "dayjs/esm/plugin/timezone"
 import utcPlugin from "dayjs/esm/plugin/utc"
+import * as cheerio from "cheerio"
 import type { NewsItem } from "@shared/types"
 
 dayjs.extend(utcPlugin)
 dayjs.extend(timezonePlugin)
 
-const feed = defineRSSSource("https://www.producthunt.com/feed")
+const feedURL = "https://www.producthunt.com/feed"
+
+function getText(html?: string) {
+  if (!html) return
+  return cheerio.load(html)("p").first().text().replace(/\s+/g, " ").trim() || undefined
+}
+
+async function feed() {
+  const data = await rss2json(feedURL)
+  if (!data?.items.length) throw new Error("Cannot fetch Product Hunt feed")
+  return data.items.map(item => ({
+    title: item.title,
+    url: item.link,
+    id: item.link,
+    description: item.description || getText(item.content),
+    pubDate: item.created,
+    extra: {
+      hover: item.description || getText(item.content),
+    },
+  }))
+}
 
 export default defineSource(async () => {
   const apiToken = process.env.PRODUCTHUNT_API_TOKEN
@@ -49,6 +70,7 @@ export default defineSource(async () => {
         id: post.id,
         title: post.name,
         url: post.url || `https://www.producthunt.com/posts/${post.slug}`,
+        description: post.tagline,
         extra: {
           info: ` △︎ ${post.votesCount || 0}`,
           hover: post.tagline,

@@ -11,6 +11,7 @@ export interface RSSInfo {
 export interface RSSItem {
   title: string
   description: string
+  content?: string
   link: string
   created?: string
 }

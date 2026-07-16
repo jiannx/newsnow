@@ -282,6 +282,14 @@ export const originSources = {
     type: "hottest",
     home: "https://www.producthunt.com/",
   },
+  "indiehackers": {
+    name: "Indie Hackers",
+    color: "teal",
+    column: "tech",
+    type: "hottest",
+    interval: Time.Common,
+    home: "https://www.indiehackers.com/",
+  },
   "github": {
     name: "Github",
     color: "gray",

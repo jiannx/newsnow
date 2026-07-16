@@ -16,6 +16,11 @@ services:
       - INIT_TABLE=true
       - ENABLE_CACHE=true
       - PRODUCTHUNT_API_TOKEN=
+      - TRANSLATE_PROVIDER=deepseek
+      - DEEPSEEK_API_KEY=
+      - DEEPSEEK_MODEL=deepseek-v4-flash
+      - TRANSLATE_TARGET=zh-Hans
+      - TRANSLATE_BATCH_SIZE=30
 
 volumes:
   newsnow_data:

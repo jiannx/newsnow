@@ -350,6 +350,14 @@
     "color": "red",
     "interval": 600000
   },
+  "indiehackers": {
+    "name": "Indie Hackers",
+    "type": "hottest",
+    "column": "tech",
+    "home": "https://www.indiehackers.com/",
+    "color": "teal",
+    "interval": 1800000
+  },
   "github": {
     "redirect": "github-trending-today",
     "name": "Github",

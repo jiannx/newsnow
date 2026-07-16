@@ -33,7 +33,7 @@ export const CardWrapper = forwardRef<HTMLElement, ItemsProps>(({ id, isDragging
     <div
       ref={ref}
       className={$(
-        "flex flex-col h-500px rounded-2xl p-4 cursor-default",
+        "flex flex-col h-620px rounded-2xl p-4 cursor-default",
         // "backdrop-blur-5",
         "transition-opacity-300",
         isDragging && "op-50",
@@ -226,6 +226,37 @@ function NewsUpdatedTime({ date }: { date: string | number }) {
   const relativeTime = useRelativeTime(date)
   return <>{relativeTime}</>
 }
+
+function NewsItemBody({ item, showInfo }: { item: NewsItem, showInfo?: boolean }) {
+  return (
+    <span className="min-w-0 flex-1 flex flex-col gap-0.5 py-1">
+      <span className="text-base leading-snug break-words">
+        {item.title}
+      </span>
+      {item.translation?.title && (
+        <span className="text-sm leading-snug op-85 break-words">
+          {item.translation.title}
+        </span>
+      )}
+      {item.description && (
+        <span className="text-xs leading-snug text-neutral-500 dark:text-neutral-400 break-words">
+          {item.description}
+        </span>
+      )}
+      {item.translation?.description && (
+        <span className="text-xs leading-snug text-neutral-500 dark:text-neutral-400 op-90 break-words">
+          {item.translation.description}
+        </span>
+      )}
+      {showInfo && item.extra?.info && (
+        <span className="text-xs text-neutral-400/80">
+          <ExtraInfo item={item} />
+        </span>
+      )}
+    </span>
+  )
+}
+
 function NewsListHot({ items }: { items: NewsItem[] }) {
   const { width } = useWindowSize()
   return (
@@ -245,14 +276,7 @@ function NewsListHot({ items }: { items: NewsItem[] }) {
             {i + 1}
           </span>
           {!!item.extra?.diff && <DiffNumber diff={item.extra.diff} />}
-          <span className="self-start line-height-none">
-            <span className="mr-2 text-base">
-              {item.title}
-            </span>
-            <span className="text-xs text-neutral-400/80 truncate align-middle">
-              <ExtraInfo item={item} />
-            </span>
-          </span>
+          <NewsItemBody item={item} showInfo />
         </a>
       ))}
     </ol>
@@ -284,7 +308,7 @@ function NewsListTimeLine({ items }: { items: NewsItem[] }) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            {item.title}
+            <NewsItemBody item={item} />
           </a>
         </li>
       ))}
