@@ -1,5 +1,6 @@
 import type { PropsWithChildren } from "react"
-import type { SourceID } from "@shared/types"
+import type { HiddenColumnID, SourceID } from "@shared/types"
+import { columns } from "@shared/metadata"
 import type { BaseEventPayload, ElementDragType } from "@atlaskit/pragmatic-drag-and-drop/dist/types/internal-types"
 import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge"
 import { reorderWithEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/util/reorder-with-edge"
@@ -18,6 +19,29 @@ import { currentColumnIDAtom, currentSourcesAtom } from "~/atoms"
 
 const AnimationDuration = 200
 const WIDTH = 350
+const COLUMN_ORDER = Object.keys(columns).filter(id => !["focus", "hottest", "realtime", "updated"].includes(id)) as HiddenColumnID[]
+
+function groupSourcesByColumn(items: SourceID[]) {
+  const grouped = new Map<HiddenColumnID | "uncategorized", SourceID[]>()
+  items.forEach((id) => {
+    const column = sources[id].column ?? "uncategorized"
+    grouped.set(column, [...(grouped.get(column) ?? []), id])
+  })
+
+  return [
+    ...COLUMN_ORDER.map(column => ({
+      id: column,
+      name: columns[column].zh,
+      items: grouped.get(column) ?? [],
+    })),
+    {
+      id: "uncategorized" as const,
+      name: "未分类",
+      items: grouped.get("uncategorized") ?? [],
+    },
+  ].filter(group => group.items.length)
+}
+
 export function Dnd() {
   const [items, setItems] = useAtom(currentSourcesAtom)
   const currentColumnID = useAtomValue(currentColumnIDAtom)
@@ -32,21 +56,46 @@ export function Dnd() {
 
   if (!items.length) return null
 
+  const groups = groupSourcesByColumn(items)
+  const renderCard = (id: SourceID, index: number, groupLength = items.length) => (
+    <motion.li
+      key={id}
+      className={$(isMobile && "flex-shrink-0", isMobile && index === groupLength - 1 && "mr-2")}
+      style={isMobile ? { width: `${width - 16 > WIDTH ? WIDTH : width - 16}px` } : undefined}
+      transition={{
+        type: "tween",
+        duration: AnimationDuration / 1000,
+      }}
+      variants={{
+        hidden: {
+          y: 20,
+          opacity: 0,
+        },
+        visible: {
+          y: 0,
+          opacity: 1,
+        },
+      }}
+    >
+      <SortableCardWrapper id={id} sortable={sortable} />
+    </motion.li>
+  )
+
   return (
     <DndWrapper items={items} setItems={setItems} isSingleColumn={isMobile} sortable={sortable}>
-      <OverlayScrollbar defer className="overflow-x-auto">
+      <OverlayScrollbar defer className={$(sortable && "overflow-x-auto")}>
         <motion.ol
-          className={isMobile
-            ? "flex px-2 gap-6 pb-4 scroll-smooth"
-            : "grid w-full gap-6"}
+          className={sortable
+            ? isMobile
+              ? "flex px-2 gap-6 pb-4 scroll-smooth"
+              : "grid w-full gap-6"
+            : "flex flex-col gap-8"}
           ref={parent}
-          style={isMobile
+          style={sortable && !isMobile
             ? {
-                // 横向滚动布局
-              }
-            : {
                 gridTemplateColumns: `repeat(auto-fill, minmax(${minWidth}px, 1fr))`,
-              }}
+              }
+            : undefined}
           initial="hidden"
           animate="visible"
           variants={{
@@ -62,29 +111,23 @@ export function Dnd() {
             },
           }}
         >
-          {items.map((id, index) => (
-            <motion.li
-              key={id}
-              className={$(isMobile && "flex-shrink-0", isMobile && index === items.length - 1 && "mr-2")}
-              style={isMobile ? { width: `${width - 16 > WIDTH ? WIDTH : width - 16}px` } : undefined}
-              transition={{
-                type: "tween",
-                duration: AnimationDuration / 1000,
-              }}
-              variants={{
-                hidden: {
-                  y: 20,
-                  opacity: 0,
-                },
-                visible: {
-                  y: 0,
-                  opacity: 1,
-                },
-              }}
-            >
-              <SortableCardWrapper id={id} sortable={sortable} />
-            </motion.li>
-          ))}
+          {sortable
+            ? items.map((id, index) => renderCard(id, index))
+            : groups.map(group => (
+                <li key={group.id} className="flex flex-col gap-3">
+                  <h2 className="px-2 text-sm font-bold op-70 tracking-normal">{group.name}</h2>
+                  <ol
+                    className={isMobile
+                      ? "flex px-2 gap-6 pb-4 overflow-x-auto scroll-smooth"
+                      : "grid w-full gap-6"}
+                    style={isMobile
+                      ? undefined
+                      : { gridTemplateColumns: `repeat(auto-fill, minmax(${minWidth}px, 1fr))` }}
+                  >
+                    {group.items.map((id, index) => renderCard(id, index, group.items.length))}
+                  </ol>
+                </li>
+              ))}
         </motion.ol>
       </OverlayScrollbar>
       {isMobile && (

@@ -35,6 +35,7 @@ export const columns = {
 
 const updatedSourceIds = [..._updatedSourceIds] as SourceID[]
 const defaultSourceOrder = ["producthunt", "github-trending-today", "hackernews", "indiehackers"] as const satisfies SourceID[]
+const defaultHottestExcludedSourceIds = ["bilibili-hot-video", "bilibili-ranking"] as const satisfies SourceID[]
 
 export const fixedColumnIds = ["focus", "hottest", "realtime", "updated"] as const satisfies Partial<ColumnID>[]
 export const hiddenColumns = Object.keys(columns).filter(id => !fixedColumnIds.includes(id as any)) as HiddenColumnID[]
@@ -43,6 +44,7 @@ function getSortedSourceIds(type: "hottest" | "realtime") {
   const ids = typeSafeObjectEntries(sources)
     .filter(([, v]) => v.type === type && !v.redirect)
     .map(([k]) => k)
+    .filter(id => type !== "hottest" || !(defaultHottestExcludedSourceIds as readonly SourceID[]).includes(id))
     .sort((m, n) => m.localeCompare(n))
 
   if (type !== "hottest") return ids
