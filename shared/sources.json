@@ -358,6 +358,14 @@
     "color": "teal",
     "interval": 1800000
   },
+  "reddit": {
+    "name": "Reddit",
+    "type": "hottest",
+    "column": "world",
+    "home": "https://www.reddit.com/r/popular/",
+    "color": "orange",
+    "interval": 1800000
+  },
   "github": {
     "redirect": "github-trending-today",
     "name": "Github",

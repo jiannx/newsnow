@@ -19,6 +19,9 @@ export const columns = {
   sports: {
     zh: "体育",
   },
+  curated: {
+    zh: "自选",
+  },
   focus: {
     zh: "关注",
   },
@@ -35,8 +38,29 @@ export const columns = {
 
 const updatedSourceIds = [..._updatedSourceIds] as SourceID[]
 const defaultHottestExcludedSourceIds = ["bilibili-hot-video", "bilibili-ranking"] as const satisfies SourceID[]
+const curatedSourceIds = [
+  "aihot",
+  "v2ex-share",
+  "hackernews",
+  "producthunt",
+  "github-trending-today",
+  "indiehackers",
+  "reddit",
+  "sspai",
+  "juejin",
+  "tencent-hot",
+  "thepaper",
+  "toutiao",
+  "zhihu",
+  "zaobao",
+  "kaopu",
+  "wallstreetcn-quick",
+  "cls-telegraph",
+  "xueqiu-hotstock",
+  "jin10",
+] as const satisfies readonly SourceID[]
 
-export const fixedColumnIds = ["focus", "hottest", "realtime", "updated"] as const satisfies Partial<ColumnID>[]
+export const fixedColumnIds = ["curated", "focus", "hottest", "realtime", "updated"] as const satisfies Partial<ColumnID>[]
 export const hiddenColumns = Object.keys(columns).filter(id => !fixedColumnIds.includes(id as any)) as HiddenColumnID[]
 
 function getSortedSourceIds(type: "hottest" | "realtime") {
@@ -49,6 +73,11 @@ function getSortedSourceIds(type: "hottest" | "realtime") {
 
 export const metadata: Metadata = typeSafeObjectFromEntries(typeSafeObjectEntries(columns).map(([k, v]) => {
   switch (k) {
+    case "curated":
+      return [k, {
+        name: v.zh,
+        sources: [...curatedSourceIds],
+      }]
     case "focus":
       return [k, {
         name: v.zh,

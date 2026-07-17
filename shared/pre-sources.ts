@@ -290,6 +290,14 @@ export const originSources = {
     interval: Time.Common,
     home: "https://www.indiehackers.com/",
   },
+  "reddit": {
+    name: "Reddit",
+    color: "orange",
+    column: "world",
+    type: "hottest",
+    interval: Time.Common,
+    home: "https://www.reddit.com/r/popular/",
+  },
   "github": {
     name: "Github",
     color: "gray",
