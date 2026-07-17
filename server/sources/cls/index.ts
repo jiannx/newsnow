@@ -27,6 +27,8 @@ interface Hot {
   data: Item[]
 }
 
+const telegraphFallback = defineRSSHubSource("/cls/telegraph")
+
 const depth = defineSource(async () => {
   const apiUrl = `https://www.cls.cn/v3/depth/home/assembled/1000`
   const res: Depthes = await myFetch(apiUrl, {
@@ -59,26 +61,30 @@ const hot = defineSource(async () => {
 })
 
 const telegraph = defineSource(async () => {
-  const apiUrl = `https://www.cls.cn/v1/roll/get_roll_list`
-  const res: TelegraphRes = await myFetch(apiUrl, {
-    query: Object.fromEntries(await getSearchParams({
-      last_time: Math.floor(Date.now() / 1000),
-      refresh_type: 1,
-      rn: 30,
-    })),
-    headers: {
-      Referer: "https://www.cls.cn/telegraph",
-    },
-  })
-  return res.data.roll_data.filter(k => !k.is_ad).map((k) => {
-    return {
-      id: k.id,
-      title: k.title || k.brief,
-      mobileUrl: k.shareurl,
-      pubDate: k.ctime * 1000,
-      url: `https://www.cls.cn/detail/${k.id}`,
-    }
-  })
+  try {
+    const apiUrl = `https://www.cls.cn/v1/roll/get_roll_list`
+    const res: TelegraphRes = await myFetch(apiUrl, {
+      query: Object.fromEntries(await getSearchParams({
+        last_time: Math.floor(Date.now() / 1000),
+        refresh_type: 1,
+        rn: 30,
+      })),
+      headers: {
+        Referer: "https://www.cls.cn/telegraph",
+      },
+    })
+    return res.data.roll_data.filter(k => !k.is_ad).map((k) => {
+      return {
+        id: k.id,
+        title: k.title || k.brief,
+        mobileUrl: k.shareurl,
+        pubDate: k.ctime * 1000,
+        url: `https://www.cls.cn/detail/${k.id}`,
+      }
+    })
+  } catch {
+    return telegraphFallback()
+  }
 })
 
 export default defineSource({
