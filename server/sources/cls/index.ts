@@ -28,6 +28,22 @@ interface Hot {
 }
 
 const telegraphFallback = defineRSSHubSource("/cls/telegraph")
+const telegraphNewsFeed = "https://news.google.com/rss/search?q=site%3Acls.cn&hl=zh-CN&gl=CN&ceid=CN%3Azh-Hans"
+
+async function getTelegraphFallback() {
+  try {
+    return await telegraphFallback()
+  } catch {
+    const data = await rss2json(telegraphNewsFeed)
+    if (!data?.items.length) throw new Error("Cannot fetch CLS fallback feed")
+    return data.items.slice(0, 30).map(item => ({
+      id: item.link,
+      title: item.title.replace(/\s+-\s+财联社$/, ""),
+      url: item.link,
+      pubDate: item.created,
+    }))
+  }
+}
 
 const depth = defineSource(async () => {
   const apiUrl = `https://www.cls.cn/v3/depth/home/assembled/1000`
@@ -83,7 +99,7 @@ const telegraph = defineSource(async () => {
       }
     })
   } catch {
-    return telegraphFallback()
+    return getTelegraphFallback()
   }
 })
 
