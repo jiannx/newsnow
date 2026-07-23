@@ -90,6 +90,10 @@ In project root directory:
 docker compose up
 ```
 
+The provided Compose configuration binds NewsNow to `127.0.0.1:4444`. Expose
+it through an HTTPS reverse proxy such as Nginx instead of opening port `4444`
+to the internet.
+
 You can also set Environment Variables in `docker-compose.yml`.
 
 ## Development

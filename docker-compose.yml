@@ -2,8 +2,9 @@ services:
   newsnow:
     image: ghcr.io/ourongxing/newsnow:latest
     container_name: newsnow
+    restart: unless-stopped
     ports:
-      - '4444:4444'
+      - '127.0.0.1:4444:4444'
     volumes:
       - newsnow_data:/usr/app/.data
     environment:

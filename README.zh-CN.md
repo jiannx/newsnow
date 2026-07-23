@@ -80,6 +80,9 @@ ENABLE_CACHE=true
 ```
 docker compose up
 ```
+默认的 Compose 配置会将 NewsNow 绑定到 `127.0.0.1:4444`，建议通过
+Nginx 等 HTTPS 反向代理对外提供访问，不要将 `4444` 端口直接暴露到互联网。
+
 同样可以通过 `docker-compose.yaml` 配置环境变量。
 
 ## 开发
